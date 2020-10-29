@@ -807,8 +807,14 @@ class Network(object):
                     # store also synapse indices allowing for computing LFPs from syn.i
                     cell.synidx.append(idx)
 
-                    # store gid and xyz-coordinate of synapse positions
-                    syn_idx_pos.append((cell.gid, cell.xmid[idx], cell.ymid[idx], cell.zmid[idx]))
+                    # store gid and xyz-coordinate of synapse positions.
+                    # add also the synapse weight, delay and pre-synaptic GID.
+                    syn_idx_pos.append(
+                        (
+                            cell.gid, idx, #cell.xmid[idx], cell.ymid[idx], cell.zmid[idx],
+                            weight, delays[i], pre_gid
+                        )
+                    )
 
                 syncount += nidx
 
@@ -829,13 +835,19 @@ class Network(object):
                 synData = flattenlist(COMM.gather(syn_idx_pos))
 
                 # convert to structured array
-                dtype = [('gid', 'i8'), ('x', float), ('y', float), ('z', float)]
+                dtype = [('gid', 'i8'), ('idx', 'i8'), # ('x', float), ('y', float), ('z', float),
+                    ('weight', float), ('delay', float), ('pre_gid', 'i8')
+                ]
                 synDataArray = np.empty((len(synData), ), dtype=dtype)
-                for i, (gid, x, y, z) in enumerate(synData):
+                for i, (gid, idx, weight, delay, pre_gid) in enumerate(synData):    #x, y, z,
                     synDataArray[i]['gid'] = gid
-                    synDataArray[i]['x'] = x
-                    synDataArray[i]['y'] = y
-                    synDataArray[i]['z'] = z
+                    synDataArray[i]['idx'] = idx
+                    # synDataArray[i]['x'] = x
+                    # synDataArray[i]['y'] = y
+                    # synDataArray[i]['z'] = z
+                    synDataArray[i]['weight'] = weight
+                    synDataArray[i]['delay'] = delay
+                    synDataArray[i]['pre_gid'] = pre_gid
                 # Dump to hdf5 file, append to file if entry exists
                 f = h5py.File(os.path.join(self.OUTPUTPATH,
                                            'synapse_positions.h5'), 'a')
