@@ -247,7 +247,7 @@ def calc_lfp_soma_as_point_anisotropic(cell, x, y, z, sigma, r_limit):
         somainds = cell.get_idx("soma")
     except Exception:
         raise Exception('Call {}.get_idx("soma") failed in method LFPy.lfpcalc.calc_lfp_soma_as_point'.format(cell))
-    
+
     dx2_soma = (cell.xmid[somainds] - x)**2
     dy2_soma = (cell.ymid[somainds] - y)**2
     dz2_soma = (cell.zmid[somainds] - z)**2
@@ -300,9 +300,9 @@ def calc_lfp_linesource(cell, x, y, z, sigma, r_limit):
 
     """Calculate electric field potential using the line-source method, all
     compartments treated as line sources, including soma.
-    
+
     Parameters
-    ----------        
+    ----------
     cell: obj
         LFPy.Cell or LFPy.TemplateCell like instance
     x : float
@@ -324,7 +324,7 @@ def calc_lfp_linesource(cell, x, y, z, sigma, r_limit):
     yend = cell.yend
     zstart = cell.zstart
     zend = cell.zend
-    
+
     deltaS = _deltaS_calc(xstart, xend, ystart, yend, zstart, zend)
     h = _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z)
     r2 = _r2_calc(xend, yend, zend, x, y, z, h)
@@ -357,7 +357,7 @@ def calc_lfp_soma_as_point(cell, x, y, z, sigma, r_limit):
 
     """Calculate electric field potential using the line-source method,
     soma is treated as point/sphere source
-    
+
     Parameters
     ----------
     cell: obj
@@ -396,7 +396,7 @@ def calc_lfp_soma_as_point(cell, x, y, z, sigma, r_limit):
     r2 = _r2_calc(xend, yend, zend, x, y, z, h)
     r_soma = _r_soma_calc(xmid, ymid, zmid, x, y, z)
     if np.any(r_soma < r_limit[somainds]):
-        print('Adjusting r-distance to soma segments')
+        # print('Adjusting r-distance to soma segments')    # mute this...
         r_soma[r_soma < r_limit[somainds]
                ] = r_limit[somainds][r_soma < r_limit[somainds]]
 

@@ -182,7 +182,7 @@ class Cell(object):
             if not isinstance(morphology, type(neuron.h.SectionList)):
                 mssg = "%s sections detected! " % sum(1 for sec in neuron.h.allsec()) + \
                        "Consider setting 'delete_sections=True'"
-                warn(mssg)
+                # warn(mssg)    # mute this warning...
 
         #load morphology
         try:

@@ -146,9 +146,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         radii = [1., 2., 4., 8.]
         sigmas = [1., 2., 4., 8.]
         r_el = np.array([[1., 0., 7.]])
-        fs = LFPy.FourSphereVolumeConductor(r_electrodes=r_el,
-                                            radii=radii,
-                                            sigmas=sigmas)
+        fs = LFPy.FourSphereVolumeConductor(radii, sigmas, r_el)
 
         rz1 = np.array([0., 0., 0.])
         with np.testing.assert_raises(RuntimeError):
@@ -169,13 +167,13 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         sigmas = [1., 2., 4., 8.]
         r_el = np.array([[0., 0., 1.5]])
         with np.testing.assert_raises(RuntimeError):
-            LFPy.FourSphereVolumeConductor(r_el, radii1, sigmas)
+            LFPy.FourSphereVolumeConductor(radii1, sigmas, r_el)
         with np.testing.assert_raises(RuntimeError):
-            LFPy.FourSphereVolumeConductor(r_el, radii2, sigmas)
+            LFPy.FourSphereVolumeConductor(radii2, sigmas, r_el)
         with np.testing.assert_raises(RuntimeError):
-            LFPy.FourSphereVolumeConductor(r_el, radii3, sigmas)
+            LFPy.FourSphereVolumeConductor(radii3, sigmas, r_el)
         with np.testing.assert_raises(RuntimeError):
-            LFPy.FourSphereVolumeConductor(r_el, radii4, sigmas)
+            LFPy.FourSphereVolumeConductor(radii4, sigmas, r_el)
 
     def test_check_params01(self):
         '''Test that Error is raised if invalid entries in sigmas'''
@@ -186,13 +184,13 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         sigmas4 = [1., 2., 4., -8.]
         r_el = np.array([[0., 0., 1.5]])
         with np.testing.assert_raises(ValueError):
-            LFPy.FourSphereVolumeConductor(r_el, radii, sigmas1)
+            LFPy.FourSphereVolumeConductor(radii, sigmas1, r_el)
         with np.testing.assert_raises(RuntimeError):
-            LFPy.FourSphereVolumeConductor(r_el, radii, sigmas2)
+            LFPy.FourSphereVolumeConductor(radii, sigmas2, r_el)
         with np.testing.assert_raises(RuntimeError):
-            LFPy.FourSphereVolumeConductor(r_el, radii, sigmas3)
+            LFPy.FourSphereVolumeConductor(radii, sigmas3, r_el)
         with np.testing.assert_raises(RuntimeError):
-            LFPy.FourSphereVolumeConductor(r_el, radii, sigmas4)
+            LFPy.FourSphereVolumeConductor(radii, sigmas4, r_el)
 
     def test_check_params02(self):
         '''Test that ValueError is raised if electrode outside head'''
@@ -201,9 +199,9 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         r_el1 = np.array([[0., 0., 15.]])
         r_el2 = np.array([[0., 0., 1.5], [12., 0., 0.]])
         with np.testing.assert_raises(ValueError):
-            LFPy.FourSphereVolumeConductor(r_el1, radii, sigmas)
+            LFPy.FourSphereVolumeConductor(radii, sigmas, r_el1)
         with np.testing.assert_raises(ValueError):
-            LFPy.FourSphereVolumeConductor(r_el2, radii, sigmas)
+            LFPy.FourSphereVolumeConductor(radii, sigmas, r_el2)
 
     def test_decompose_dipole01(self):
         '''Test radial and tangential parts of dipole sums to dipole'''
@@ -232,7 +230,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
                            [80000., 2000., 3000.],
                            [-2000., -80000., -3000.]])
         el_locs = np.array([[90000., 5000., -5000.]])
-        fs = LFPy.FourSphereVolumeConductor(el_locs, radii, sigmas)
+        fs = LFPy.FourSphereVolumeConductor(radii, sigmas, el_locs)
         for p_loc in p_locs:
             fs._rz_params(p_loc)
             p_rads, p_tans = fs._decompose_dipole(ps)
@@ -283,7 +281,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
                          [-5.59822325e3, -9.69640709e3, -9.93712111e4],
                          [99990., 0., 0.001]])
 
-        fs = LFPy.FourSphereVolumeConductor(r_el, radii, sigmas)
+        fs = LFPy.FourSphereVolumeConductor(radii, sigmas, r_el)
         fs._rz_params(rz)
 
         P1 = np.array([[0., 0., 123456789.],
@@ -345,7 +343,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
                            [0., 15., 0.],
                            [0., 25., 0.],
                            [0., 40., 0.]])
-        four_s = LFPy.FourSphereVolumeConductor(r_elec, radii, sigmas)
+        four_s = LFPy.FourSphereVolumeConductor(radii, sigmas, r_elec)
         pots_4s = four_s.calc_potential(p, rz)
         inf_s = LFPy.InfiniteVolumeConductor(0.3)
         pots_inf = inf_s.get_dipole_potential(p, r_elec - rz)
@@ -363,10 +361,9 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         sigmas = fem_sim['sigmas'] # [S/cm]
         ele_coords = fem_sim['ele_coords'] # [µm]
 
-        fs = LFPy.FourSphereVolumeConductor(ele_coords, radii, sigmas)
+        fs = LFPy.FourSphereVolumeConductor(radii, sigmas, ele_coords)
         k_mV_to_muV = 1e3
-        pot_analytical = fs.calc_potential(p, rz).reshape((len(ele_coords),)
-                                          ).reshape(pot_fem.shape)*k_mV_to_muV
+        pot_analytical = fs.calc_potential(p, rz).reshape((len(ele_coords),)).reshape(pot_fem.shape)*k_mV_to_muV
         global_error = np.abs(pot_analytical - pot_fem)/(np.max(np.abs(pot_fem)))
         np.testing.assert_array_less(global_error, 0.01)
 
@@ -398,7 +395,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
 
 
         for i in range(len(p_locs)):
-            fs = LFPy.FourSphereVolumeConductor(el_locs[i], radii, sigmas)
+            fs = LFPy.FourSphereVolumeConductor(radii, sigmas, el_locs[i])
             phi = fs.calc_potential(dips[i], p_locs[i])
             if i == 0:
                 phi0 = phi[0][0]
@@ -426,7 +423,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         cell.set_pos(x=0, y=0, z=100)
         t_point = [1,100,-1]
 
-        MD_4s = LFPy.FourSphereVolumeConductor(electrode_locs, radii, sigmas)
+        MD_4s = LFPy.FourSphereVolumeConductor(radii, sigmas, electrode_locs)
         p, dipole_locs = cell.get_multi_current_dipole_moments(t_point)
         Np, Nt, Nd = p.shape
         Ne = electrode_locs.shape[0]
@@ -436,7 +433,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         for i in range(Np):
             dip = p[i]
             dip_loc = dipole_locs[i]
-            fs = LFPy.FourSphereVolumeConductor(electrode_locs, radii, sigmas)
+            fs = LFPy.FourSphereVolumeConductor(radii, sigmas, electrode_locs)
             pot = fs.calc_potential(dip, dip_loc)
             pot_sum += pot
 
@@ -468,7 +465,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         cell.set_pos(x=0, y=0, z=100)
         t_point = [1,100,-1]
 
-        MD_4s = LFPy.FourSphereVolumeConductor(electrode_locs, radii, sigmas)
+        MD_4s = LFPy.FourSphereVolumeConductor(radii, sigmas, electrode_locs)
         p, dipole_locs = cell.get_multi_current_dipole_moments(t_point)
         Np, Nt, Nd = p.shape
         Ne = electrode_locs.shape[0]
@@ -478,7 +475,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         for i in range(Np):
             dip = p[i]
             dip_loc = dipole_locs[i]
-            fs = LFPy.FourSphereVolumeConductor(electrode_locs, radii, sigmas)
+            fs = LFPy.FourSphereVolumeConductor(radii, sigmas, electrode_locs)
             pot = fs.calc_potential(dip, dip_loc)
             pot_sum += pot
 
@@ -672,7 +669,7 @@ def make_class_object(rz, r_el):
     '''Return class object fs'''
     radii = [79., 80., 85., 90.]
     sigmas = [0.3, 0.015, 15, 0.3]
-    fs = LFPy.FourSphereVolumeConductor(r_el, radii, sigmas)
+    fs = LFPy.FourSphereVolumeConductor(radii, sigmas, r_el)
     fs._rz_params(rz)
     return fs
 
@@ -682,7 +679,7 @@ def make_simple_class_object():
     sigmas = [1., 2., 4., 8.]
     rz1 = np.array([0., 0., .9])
     r_el = np.array([[0., 0., 1.5]])
-    fs = LFPy.FourSphereVolumeConductor(r_el, radii, sigmas)
+    fs = LFPy.FourSphereVolumeConductor(radii, sigmas, r_el)
     fs._rz_params(rz1)
     return fs
 
