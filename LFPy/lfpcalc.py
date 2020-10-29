@@ -396,7 +396,11 @@ def calc_lfp_soma_as_point(cell, x, y, z, sigma, r_limit):
     r2 = _r2_calc(xend, yend, zend, x, y, z, h)
     r_soma = _r_soma_calc(xmid, ymid, zmid, x, y, z)
     if np.any(r_soma < r_limit[somainds]):
+<<<<<<< HEAD
         # print('Adjusting r-distance to soma segments')    # mute this...
+=======
+        # print('Adjusting r-distance to soma segments')
+>>>>>>> 1c1d8e7fbbc959897a7061a1d92aa191f3ef84a7
         r_soma[r_soma < r_limit[somainds]
                ] = r_limit[somainds][r_soma < r_limit[somainds]]
 
