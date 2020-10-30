@@ -183,7 +183,7 @@ class Cell(object):
                 mssg = "%s sections detected! " % sum(1 for sec in neuron.h.allsec()) + \
                        "Consider setting 'delete_sections=True'"
                 # warn(mssg)    # mute this warning...
-
+        print("Cell Module...")
         #load morphology
         try:
             assert(morphology is not None)
