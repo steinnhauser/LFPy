@@ -753,7 +753,6 @@ class Network(object):
         # keep track of synapse positions for this connect
         # call on this rank such that these can be communicated and stored
         syn_idx_pos = []
-        print("Connect function.")
         # iterate over gids on this RANK and create connections
         for i, (post_gid, cell) in enumerate(zip(self.populations[post].gids, self.populations[post].cells)):
             # do NOT iterate over all possible presynaptic neurons
